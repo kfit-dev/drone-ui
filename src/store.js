@@ -138,6 +138,8 @@ export default new Vuex.Store({
     branches: {},
     deployments: {},
 
+    deployments: {},
+
     builds: {
       /*
       EXAMPLE:
@@ -306,6 +308,10 @@ export default new Vuex.Store({
       );
     },
 
+    //
+    // deployment list
+    //
+
     DEPLOYMENT_LIST_LOADING(state, { params }) {
       const slug = `${params.namespace}/${params.name}`;
 
@@ -320,7 +326,6 @@ export default new Vuex.Store({
       const slug = `${params.namespace}/${params.name}`;
       applyFailure(state.deployments[slug], error);
     },
-
 
     DEPLOYMENT_LIST_SUCCESS(state, { params, res }) {
       const slug = `${params.namespace}/${params.name}`;
@@ -543,6 +548,16 @@ export default new Vuex.Store({
     BUILD_RETRY_LOADING() {},
     BUILD_RETRY_FAILURE() {},
     BUILD_RETRY_SUCCESS(state, { namespace, name, build }) {
+      const slug = `${namespace}/${name}`;
+
+      if (state.builds[slug]) {
+        insertBuildCollection(state.builds[slug].data, slug, build);
+      }
+    },
+
+    BUILD_CREATE_LOADING() {},
+    BUILD_CREATE_SUCCESS() {},
+    BUILD_CREATE_FAILURE(state, { namespace, name, build }) {
       const slug = `${namespace}/${name}`;
 
       if (state.builds[slug]) {

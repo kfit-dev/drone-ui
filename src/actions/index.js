@@ -2,6 +2,7 @@ export {
   cancelBuild,
   fetchBuild,
   fetchBuilds,
+  restartBuild,
   createBuild,
   createDeployment,
   approveBuild,

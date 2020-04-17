@@ -1,6 +1,6 @@
 <template>
   <portal to="body">
-    <div :class="{ [className]: true, modal: true }">
+    <div :class="{ [className]: Boolean(className), modal: true }">
       <Overlay opened/>
 
       <div class="modal-container">
@@ -17,12 +17,22 @@ export default {
   components: { Overlay },
   props: {
     className: String
+  },
+  mounted() {
+    document.body.classList.add("has-modal")
+  },
+  destroyed() {
+    document.body.classList.remove("has-modal")
   }
 };
 </script>
 
 <style lang="scss">
 @import "../assets/styles/variables";
+.has-modal {
+  overflow: hidden;
+}
+
 .modal-container {
   position: fixed;
   top: 0;

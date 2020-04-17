@@ -20,7 +20,21 @@
 
     <PageHeader class="secondary-page-header">
       <h1 v-if="repo">{{ repo.name }}</h1>
-      <portal-target name="secondary-page-header-actions" slim/>
+      <portal-target v-if="repo" name="secondary-page-header-actions">
+        <div class="header-actions">
+          <Button
+            theme="primary"
+            class="button-deploy"
+            @click.native="openBuildModal"
+            :disabled="!isCollaborator">
+            <span>Build</span>
+            <IconPlay/>
+          </Button>
+          <Modal className="deployment-modal" v-if="showBuildModal">
+            <BuildForm @submit="closeBuildModal" @cancel="closeBuildModal" />
+          </Modal>
+        </div>
+      </portal-target>
     </PageHeader>
 
     <!--
@@ -71,6 +85,7 @@ import Alert from "@/components/Alert.vue";
 import AlertError from "@/components/AlertError.vue";
 import Breadcrumb from "@/components/Breadcrumb.vue";
 import IconArrow from "@/components/icons/IconArrow.vue";
+import IconPlay from "@/components/icons/IconPlay.vue";
 import IconCancel from "@/components/icons/IconCancel.vue";
 import IconActivateGear from "@/components/icons/IconActivateGear.vue";
 import Button from "@/components/buttons/Button.vue";
@@ -79,6 +94,8 @@ import PageHeader from "@/components/PageHeader";
 import Link from "@/components/Link";
 import IconRestart from "@/components/icons/IconRestart.vue";
 import Loading from "@/components/Loading.vue";
+import BuildForm from "@/components/forms/BuildForm.vue";
+import Modal from "@/components/Modal.vue";
 
 export default {
   name: "repo",
@@ -91,10 +108,18 @@ export default {
     IconCancel,
     IconRestart,
     IconActivateGear,
+    IconPlay,
+    BuildForm,
     Button,
     Card,
     Loading,
-    Link
+    Link,
+    Modal
+  },
+  data() {
+    return {
+      showBuildModal: false,
+    }
   },
   computed: {
     slug() {
@@ -143,10 +168,17 @@ export default {
     },
     userPresent() {
       return this.$store.state.user.dStatus === "present";
-    }
+    },
   },
   methods: {
-    handleActivate: function() {
+    openBuildModal() {
+      this.showBuildModal = true
+    },
+    closeBuildModal() {
+      debugger
+      this.showBuildModal = false
+    },
+    handleActivate() {
       const { namespace, name } = this.$route.params;
       this.$store.dispatch("enableRepo", {
         namespace: namespace,

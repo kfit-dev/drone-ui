@@ -28,8 +28,8 @@ export default {
       if (this.type === "actionTarget") {
         if (event === "pull_request") return { text: "#" + this.trimMergeRef(ref), href: this.hrefPR };
         if (event === "tag") return { text: this.trimTagRef(ref), href: this.hrefTag };
-        if (event === "promote") return { text: this.promotionTarget };
-        if (event === "rollback") return { text: this.promotionTarget };
+        if (event === "promote") return { text: this.build.deploy_to };
+        if (event === "rollback") return { text: this.build.deploy_to };
         if (event === "cron") return { text: this.cron };
         return { text: this.commitShaShort, href: this.hrefCommit };
       } else if (this.type === "to") {
@@ -37,12 +37,15 @@ export default {
           return { text: this.branch, href: this.hrefBranch };
         }
         if (event === "rollback") {
-          return { text: this.commitShaShort };
+          return { text: `#${this.build.parent}`, href: this.hrefParent };
         }
         if (event === "promote") {
-          return { text: this.commitShaShort };
+          return { text: `#${this.build.parent}`, href: this.hrefParent };
         }
       }
+    },
+    hrefParent() {
+      return this.build && this.repo && `/${this.repo.slug}/${this.build.parent}`
     },
     hrefPR() {
       return this.build && this.repo &&
@@ -71,9 +74,6 @@ export default {
     },
     commitShaShort() {
       return this.commitSha && this.commitSha.substr(0, 8);
-    },
-    promotionTarget() {
-      return this.build.deploy_to;
     }
   },
   methods: {

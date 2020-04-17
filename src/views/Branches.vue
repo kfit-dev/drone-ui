@@ -47,8 +47,8 @@ export default {
       return collection ? { ...collection, data: collection.data } : null;
     },
     items() {
-      // return this.collection ? Object.values(this.collection.data).map(x => x.data) : [];
-      return this.collection ? Object.values(this.collection.data).map(x => x.data).sort((a, b) => b.number - a.number).slice(0, 10) : [];
+      // todo remove slice
+      return this.collection ? Object.values(this.collection.data).sort((a, b) => b.number - a.number).map(x => x.data) : [];
     },
     showState() {
       if (!this.collection) return;

@@ -27,7 +27,7 @@
       </div>
 
       <div v-if="build" class="build">
-        <img :src="avatar" alt="avatar"/>
+        <img v-if="buildAvatar" :src="buildAvatar" alt="avatar"/>
         <div class="description">
           <span>{{author}}</span>
           <span> {{action}} </span>
@@ -89,8 +89,10 @@ export default {
     };
   },
   computed: {
+    buildAvatar() {
+      return this.avatar
+    },
     author() {
-      if (this.build.event === "cron") return;
       return this.build.author_login;
     },
     action() {
@@ -100,6 +102,7 @@ export default {
       if (event === "promote") return "promoted";
       if (event === "rollback") return "reverted";
       if (event === "cron") return "executed scheduled task";
+      if (event === "custom") return "manually triggered";
       return "pushed";
     },
     showElapsedTime() {

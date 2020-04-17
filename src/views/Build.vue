@@ -35,7 +35,7 @@
     </portal>
 
     <Modal className="deployment-modal" v-if="showDeploymentModal">
-      <DeploymentForm @submit="handleDeploy" @cancel="closeDeployModal" />
+      <DeploymentForm @submit="closeDeployModal" @cancel="closeDeployModal" />
     </Modal>
 
     <RepoItem
@@ -196,14 +196,15 @@ import IconDeploy from "@/components/icons/IconDeploy.vue";
 import IconFullscreen from "@/components/icons/IconFullscreen.vue";
 import IconDownload from "@/components/icons/IconDownload.vue";
 import IconRestart from "@/components/icons/IconRestart.vue";
-import Modal from "@/components/Modal.vue";
+import IconArrow from "@/components/icons/IconArrow.vue";
+import IconSource from "@/components/icons/IconSource.vue";
+import IconPlay from "@/components/icons/IconPlay.vue";
 import ScrollLock from "@/components/utils/ScrollLock.vue";
 import Loading from "@/components/Loading.vue";
-import IconArrow from "../components/icons/IconArrow";
-import IconSource from "../components/icons/IconSource";
-import AlertError from "../components/AlertError";
-import TimeElapsed from "../components/TimeElapsed";
-import Status from "@/components/Status";
+import AlertError from "@/components/AlertError.vue";
+import TimeElapsed from "@/components/TimeElapsed.vue";
+import Status from "@/components/Status.vue";
+import Modal from "@/components/Modal.vue";
 
 import { isBuildFinished } from "@/lib/buildHelper";
 
@@ -235,8 +236,11 @@ export default {
     IconDownload,
     IconDeploy,
     IconRestart,
+    IconPlay,
     IconSource,
-    IconFullscreen
+    IconFullscreen,
+    Modal,
+    DeploymentForm
   },
   data() {
     return {
@@ -245,7 +249,7 @@ export default {
       logStep: 250,
       logLimit: 250,
       showToTop: false,
-      showDeploymentModal: false,
+      showDeploymentModal: false
     };
   },
   mounted() {
@@ -343,7 +347,7 @@ export default {
       return this.step && this.step.stopped && this.logsShowState === "data";
     },
     showDeployButton() {
-      return this.build && this.isBuildFinished(this.build) && this.isCollaborator;
+      return this.build && this.isCollaborator;
     },
     showCancelButton() {
       return this.build && !this.isBuildFinished(this.build) && this.isCollaborator;
@@ -353,23 +357,25 @@ export default {
     getThemeByStatus: Status.getThemeByStatus,
     humanizeStatus: Status.humanizeStatus,
     isBuildFinished,
-    handleCancel: function() {
+    handleCancel() {
       const { namespace, name, build } = this.$route.params;
       this.$store.dispatch("cancelBuild", { namespace, name, build });
     },
-    handleDeploy: function(deployment) {
+    handleRestart() {
       const { namespace, name, build } = this.$route.params;
-      this.$store.dispatch("createDeployment", { namespace, name, build, ...deployment }).then(data => {
-        this.showDeploymentModal = false;
+
+      this.$store.dispatch("restartBuild", { namespace, name, build }).then(data => {
         this.$router.push(`/${namespace}/${name}/${data.build.number}`);
       });
     },
-    handleRestart: function() {
-      const { namespace, name, build } = this.$route.params;
-
-      this.$store.dispatch("createBuild", { namespace, name, build }).then(data => {
-        this.$router.push(`/${namespace}/${name}/${data.build.number}`);
-      });
+    setShowDeploymentModal(nextState) {
+      if (nextState) {
+        this.$store.dispatch("fetchDeployments", this.$store.state.route.params).then(() => {
+          this.showDeploymentModal = nextState
+        })
+      } else {
+        this.showDeploymentModal = nextState
+      }
     },
     handleMore: function() {
       this.logLimit += this.logStep;
@@ -543,6 +549,7 @@ export default {
 }
 
 .button-restart,
+.button-deploy,
 .button-cancel {
   min-width: 116px;
   text-align: left;
@@ -899,5 +906,18 @@ $output-header-sticky-offset: 20px;
   .ansi-magenta-bg { background-color: #c440b6; }
   .ansi-cyan-bg { background-color: #32d2d9; }
   .ansi-white-bg { background-color: #aeaeae; }
+}
+
+.deployment-modal {
+  .header {
+    font-size: 22px;
+    padding: 11px 15px;
+  }
+
+  .control-actions {
+    .button + .button {
+      margin-left: 5px;
+    }
+  }
 }
 </style>

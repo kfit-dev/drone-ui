@@ -1,11 +1,11 @@
 <template>
-  <Card class="branch-item" slim :hoverable="hoverable">
-    <div class="branch">{{ branch }}</div>
+  <Card class="deploy-item" slim :hoverable="hoverable">
+    <div class="deploy">{{ target }}</div>
     <div class="build-description">
-        <span>{{ build.sender }}</span>
-        <span> {{ action }} </span>
-        <span class="build-number"># {{ build.parent }}</span>
-        <span class="commit-message" v-if="build.message" :title="build.message"> — {{ build.message }}</span>
+      <span>{{ build.sender }}</span>
+      <span> {{ action }} </span>
+      <a class="build-number" target="_blank" :href="hrefParent">#{{ build.parent }}</a>
+      <span class="commit-message" v-if="build.message" :title="build.message"> — {{ build.message }}</span>
     </div>
     <Status :status="status"/>
   </Card>
@@ -20,7 +20,7 @@ export default {
   name: "DeploymentItem",
   props: {
     hoverable: { type: Boolean, default: false },
-    branch: { type: String, required: true },
+    target: { type: String, required: true },
     status: { type: String, required: true },
     build: { type: Object, required: true },
     linkRepo: Object
@@ -40,6 +40,9 @@ export default {
       if (event === "rollback") return "reverted to build";
       return "pushed";
     },
+    hrefParent() {
+      return this.build && this.linkRepo && `/${this.linkRepo.slug}/${this.build.parent}`
+    },
     shrinkedBuild() {
       return { ...this.build };
     }
@@ -49,7 +52,7 @@ export default {
 
 <style lang="scss">
 @import "../assets/styles/mixins";
-.branch-item {
+.deploy-item {
   display: flex;
   align-items: center;
   @include tablet {
@@ -85,7 +88,7 @@ export default {
   }
 }
 
-.branch {
+.deploy {
   max-width: 170px;
   height: 30px;
   line-height: 30px;

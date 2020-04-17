@@ -5,7 +5,7 @@
        v-click-outside="close">
     <img class='avatar' :src="user.avatar" alt="avatar"/>
 
-    <Popup :position="'bottom'" :align="'right'" :evict="!this.opened">
+    <Popup v-if="this.opened" :position="'bottom'" :align="'right'">
       <router-link to="/account" @focus.native="open" @blur.native="closeDelayed">User settings</router-link>
       <a href="/logout" class="logout" @focus="open" @blur="closeDelayed">
         {{ $t("labels.logout") }}

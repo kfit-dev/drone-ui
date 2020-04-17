@@ -8,7 +8,7 @@
 
       <router-link v-for="build in items" :key="build.id" :to="`/${slug}/${build.number}`">
         <DeploymentItem hoverable
-                    :branch="build.deploy_to"
+                    :target="build.deploy_to"
                     :status="build.status"
                     :build="build"
                     :linkRepo="repo"/>
@@ -22,6 +22,7 @@ import Card from "@/components/Card.vue";
 import DeploymentItem from "@/components/DeploymentItem.vue";
 import Loading from "@/components/Loading.vue";
 import AlertError from "@/components/AlertError.vue";
+
 export default {
   name: "Deployments",
   components: {
@@ -42,13 +43,11 @@ export default {
       return this.$store.state.repos[this.slug];
     },
     collection() {
-      // todo use proper collection;
       const collection = this.$store.state.deployments[this.slug];
       return collection ? { ...collection, data: collection.data } : null;
     },
     items() {
-      // return this.collection ? Object.values(this.collection.data).map(x => x.data) : [];
-      return this.collection ? Object.values(this.collection.data).map(x => x.data).sort((a, b) => b.number - a.number).slice(0, 10) : [];
+      return this.collection ? Object.values(this.collection.data).map(x => x.data).sort((a, b) => b.number - a.number) : [];
     },
     showState() {
       if (!this.collection) return;
@@ -62,6 +61,7 @@ export default {
 
 <style scoped lang="scss">
 @import "../assets/styles/mixins";
+
 .deployments-page {
   a {
     display: block;

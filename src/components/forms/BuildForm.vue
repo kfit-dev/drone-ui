@@ -2,27 +2,15 @@
   <BaseForm @submit.native.prevent="handleSubmit" class="form">
     <header>
       <h2 class="title">
-        Create a Deployment
+        Create a Build
       </h2>
     </header>
     <div class="control-group">
       <div class="control-label">
-        <label>Type</label>
+        <label>Branch</label>
       </div>
       <div class="controls">
-        <BaseRadioButtons
-          v-model="action"
-          name="action"
-          :options="{ promote: 'Promote', rollback: 'Rollback'}"
-        />
-      </div>
-    </div>
-    <div class="control-group">
-      <div class="control-label">
-        <label>Target</label>
-      </div>
-      <div class="controls">
-        <Autocomplete v-model="target" :options="targets" />
+        <Autocomplete v-model="branch" :options="branches" />
       </div>
     </div>
     <div class="control-group">
@@ -30,8 +18,8 @@
       <div class="controls param-list-container">
         <ul class="param-list">
           <li v-for="(val, key) in params" :key="key" class="param-list-item">
-            <code>{{key}}={{val}}</code>
-            <Button @click.native.prevent="handleRmParam(key)" type="button" theme="danger" size="m" outline borderless>Remove</Button>
+            <code class="param-list-key" :title="`${key}=${val}`">{{key}}={{val}}</code>
+            <Button @click.native.prevent="(e) => handleRmParam(key, e)" type="button" theme="danger" size="m" outline borderless>Remove</Button>
           </li>
         </ul>
         <BaseForm @submit.native.prevent="handleAddParam" class="param-list-form">
@@ -42,7 +30,7 @@
             autocorrect="off"
             autocapitalize="off"
             spellcheck="false"
-            placeholder="key"
+            placeholder="Key"
             type="text"
           />
           <BaseInput
@@ -52,7 +40,7 @@
             autocorrect="off"
             autocapitalize="off"
             spellcheck="false"
-            placeholder="value"
+            placeholder="Value"
             type="text"
           />
           <Button type="submit" size="l" theme="primary" outline borderless>Add</Button>
@@ -60,7 +48,7 @@
       </div>
     </div>
     <div class="control-actions">
-      <Button type="submit" size="l" theme="primary" :loading="submitting">Deploy</Button>
+      <Button type="submit" size="l" theme="primary" :loading="submitting">Create</Button>
       <Button type="button" size="l" outline @click.native="handleCancel">Cancel</Button>
       <div class="error-message" v-if="errors.length">{{ errors.join("\n") }}</div>
     </div>
@@ -69,27 +57,24 @@
 
 <script>
 import Button from "@/components/buttons/Button.vue";
-import BaseRadioButtons from "@/components/forms/BaseRadioButtons.vue";
 import BaseInput from "@/components/forms/BaseInput.vue";
 import BaseForm from "@/components/forms/BaseForm.vue";
 import Autocomplete from "@/components/autocomplete/Autocomplete.vue";
 
 export default {
-  name: "DeploymentForm",
+  name: "BuildForm",
   components: {
     Button,
-    BaseRadioButtons,
     BaseInput,
     BaseForm,
     Autocomplete
   },
   data() {
     return {
-      errors: [],
-      action: "promote",
-      target: "",
-      params: {},
       submitting: false,
+      errors: [],
+      branch: "",
+      params: {},
       paramInput: {
         key: "",
         value: ""
@@ -100,10 +85,10 @@ export default {
     slug() {
       return this.$route.params.namespace + "/" + this.$route.params.name;
     },
-    targets() {
-      return this.$store.state.deployments[this.slug]
-        && this.$store.state.deployments[this.slug].data
-        && Object.keys(this.$store.state.deployments[this.slug].data)
+    branches() {
+      return this.$store.state.branches[this.slug]
+        && this.$store.state.branches[this.slug].data
+        && Object.keys(this.$store.state.branches[this.slug].data)
         || [];
     },
   },
@@ -111,33 +96,31 @@ export default {
     async handleSubmit(e) {
       this.errors = [];
 
-      const { namespace, name, build } = this.$route.params;
+      const { namespace, name } = this.$route.params;
 
       const inputs = {
-        action: this.action,
-        target: this.target,
+        branch: this.branch,
         params: this.params
       };
 
-      const deployment = {
+      const build = {
         namespace,
         name,
-        build,
         ...inputs
       };
 
-      if (!this.target.length) this.errors.push("Target is required")
+      if (!this.branch.length) this.errors.push("Branch is required");
       if (!this.errors.length) {
         this.submitting = true;
 
         try {
-          const data = await this.$store.dispatch("createDeployment", deployment)
+          const data = await this.$store.dispatch("createBuild", build);
+          this.$emit("submit", inputs);
 
-          if (!data) {
-            this.errors.push("Target not found")
-          } else {
-            this.$emit("submit", inputs);
+          if (data.build) {
             this.$router.push(`/${namespace}/${name}/${data.build.number}`);
+          } else {
+            this.$store.dispatch("showNotification", { message: "No build triggered" });
           }
         } catch (err) {
           this.errors.push(err);
@@ -151,6 +134,7 @@ export default {
     },
     handleAddParam(e) {
       if (this.paramInput.key == "" || this.paramInput.value == "") return;
+
       this.params[this.paramInput.key] = this.paramInput.value;
       this.paramInput.key = "";
       this.paramInput.value = "";
@@ -160,7 +144,7 @@ export default {
     },
   },
   mounted() {
-    this.$store.dispatch("fetchDeployments", this.$store.state.route.params);
+    this.$store.dispatch("fetchBranches", this.$store.state.route.params);
   }
 };
 </script>
@@ -171,7 +155,7 @@ export default {
 }
 
 .form {
-  max-width: 520px;
+  max-width: 464px;
 
   .base-input {
     width: 100%;
@@ -184,11 +168,13 @@ export default {
     padding: 0 15px;
     display: flex;
     align-items: center;
+
     .title {
       font-size: 16px;
       font-weight: 600;
     }
   }
+
   .control-group,
   .control-actions,
   .header {
@@ -205,27 +191,41 @@ export default {
       text-align: right;
       margin-right: 1.5rem;
     }
+
     .controls {
       flex-basis: 0;
       flex-grow: 5;
       flex-shrink: 1;
     }
   }
+
   .control-actions {
     .button + .button {
       margin-left: 1rem;
     }
   }
+
   .param-list {
     &:not(:empty) {
       margin-bottom: 16px;
     }
   }
+
+  .param-list-container, .param-list-key {
+    min-width: 0;
+  }
+
+  .param-list-key {
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
   .param-list-item {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     padding: 2px 0;
+
     code {
       font-family: monospace;
     }

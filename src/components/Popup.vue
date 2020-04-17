@@ -3,8 +3,11 @@
     <slot/>
   </Modal>
 
-  <div v-else :style="style"
-       :class="{ [`position-${position}`]: true, [`align-${align}`]: true, popup: true, evict }">
+  <div 
+    v-else 
+    :style="style"
+    :class="{ [`position-${position}`]: Boolean(position), [`align-${align}`]: Boolean(align), popup: true, evict }"
+  >
     <slot/>
   </div>
 </template>
