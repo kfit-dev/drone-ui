@@ -93,10 +93,13 @@ export default {
       get() {
         return this.$route.query.branch
       },
-      set(value) {
-        if (value.length > 1) {
+      set(branch) {
+        if (branch.length > 1) {
           this.$router.replace({
-            query: { branch: value }
+            query: {
+              ...this.$route.query,
+              branch
+            }
           })
         } else {
           const query = {...this.$route.query}
@@ -105,6 +108,19 @@ export default {
             query
           })
         }
+      }
+    },
+    params: {
+      get() {
+        return this.$route.query.params
+      },
+      set(params) {
+        this.$router.replace({
+          query: {
+            ...this.$route.query,
+            params
+          }
+        })
       }
     }
   },
@@ -151,17 +167,10 @@ export default {
     handleAddParam(e) {
       if (this.paramInput.key == "" || this.paramInput.value == "") return;
 
-      const params = {
+      this.params = {
         ...this.$route.query.params,
         [this.paramInput.key]: this.paramInput.value
       }
-
-      this.$router.push({
-        query: {
-          ...this.$route.query,
-          params: params
-        }
-      })
 
       this.paramInput.key = "";
       this.paramInput.value = "";
