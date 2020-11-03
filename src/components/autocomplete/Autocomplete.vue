@@ -47,14 +47,14 @@ export default {
   },
   computed: {
     filteredOptions() {
-      return this.filter(this.options, this.input);
+      return this.filter(this.options, this.value);
     }
   },
   methods: {
     setInput(value) {
       if (value.length < 1) this.show = true;
-      this.input = value;
-      this.$emit('input', this.input);
+      this.value = value;
+      this.$emit('input', this.value);
     },
     handleSelect(value) {
       this.setInput(value);
