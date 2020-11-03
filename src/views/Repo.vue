@@ -31,7 +31,7 @@
             <IconPlay/>
           </Button>
           <Modal className="deployment-modal" v-if="showBuildModal">
-            <BuildForm @submit="closeBuildModal" @cancel="closeBuildModal" />
+            <BuildForm @submit="closeBuildModal" @cancel="closeBuildModal" :passed="this.$route.query"/>
           </Modal>
         </div>
       </portal-target>
@@ -185,7 +185,12 @@ export default {
         name: name
       });
     }
-  }
+  },
+  mounted(){
+    if (Object.keys(this.$route.query).length !== 0) {
+      this.showBuildModal = true
+    }
+  },
 };
 </script>
 

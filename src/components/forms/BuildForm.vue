@@ -47,6 +47,9 @@
         </BaseForm>
       </div>
     </div>
+    <div>
+  <Button type="button" @click.native="logProps"> hey </Button>
+    </div>
     <div class="control-actions">
       <Button type="submit" size="l" theme="primary" :loading="submitting">Create</Button>
       <Button type="button" size="l" outline @click.native="handleCancel">Cancel</Button>
@@ -69,6 +72,7 @@ export default {
     BaseForm,
     Autocomplete
   },
+  props: ['passed'],
   data() {
     return {
       submitting: false,
@@ -142,6 +146,9 @@ export default {
     handleRmParam(key) {
       this.$delete(this.params, key);
     },
+    logProps(){
+    console.log(this.passed)      
+    }
   },
   mounted() {
     this.$store.dispatch("fetchBranches", this.$store.state.route.params);
@@ -155,7 +162,7 @@ export default {
 }
 
 .form {
-  max-width: 464px;
+  // max-width: 464px;
 
   .base-input {
     width: 100%;
