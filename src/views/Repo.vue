@@ -175,7 +175,6 @@ export default {
       this.showBuildModal = true
     },
     closeBuildModal() {
-      debugger
       this.showBuildModal = false
     },
     handleActivate() {
@@ -185,7 +184,10 @@ export default {
         name: name
       });
     }
-  }
+  },
+  mounted(){
+    if (this.$route.name === "builds-new") this.showBuildModal = true
+  },
 };
 </script>
 

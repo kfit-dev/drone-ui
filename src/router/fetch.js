@@ -17,6 +17,7 @@ export const fetcher = ({ dispatch, commit }) => (to, from, next) => {
     case "deployments":
     case "build":
     case "builds":
+    case "builds-new":
     case "repo":
     case "badges":
     case "settings":
@@ -31,6 +32,7 @@ export const fetcher = ({ dispatch, commit }) => (to, from, next) => {
       dispatch("fetchBuild", params);
       break;
     case "builds":
+    case "builds-new":
       dispatch("fetchBuilds", { ...params, page: 1 });
       break;
     case "branches":
