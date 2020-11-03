@@ -30,7 +30,7 @@
             <span>Build</span>
             <IconPlay/>
           </Button>
-          <Modal className="deployment-modal" v-if="showBuildModal">
+          <Modal className="deployment-modal" v-if="$route.name === 'builds-new'">
             <BuildForm @submit="closeBuildModal" @cancel="closeBuildModal" />
           </Modal>
         </div>
@@ -116,11 +116,6 @@ export default {
     Link,
     Modal
   },
-  data() {
-    return {
-      showBuildModal: false,
-    }
-  },
   computed: {
     slug() {
       return this.$route.params.namespace + "/" + this.$route.params.name;
@@ -172,10 +167,10 @@ export default {
   },
   methods: {
     openBuildModal() {
-      this.showBuildModal = true
+      this.$router.push({name: 'builds-new'})
     },
     closeBuildModal() {
-      this.showBuildModal = false
+      this.$router.back()
     },
     handleActivate() {
       const { namespace, name } = this.$route.params;
@@ -184,10 +179,7 @@ export default {
         name: name
       });
     }
-  },
-  mounted(){
-    if (this.$route.name === "builds-new") this.showBuildModal = true
-  },
+  }
 };
 </script>
 
