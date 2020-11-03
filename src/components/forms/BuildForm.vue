@@ -10,7 +10,8 @@
         <label>Branch</label>
       </div>
       <div class="controls">
-        <Autocomplete v-model="branch" :options="branches" />
+        <BaseInput v-if="shouldRenderTextInput" v-model="branch"></BaseInput>
+        <Autocomplete v-else v-model="branch"  :options="branches"/>
       </div>
     </div>
     <div class="control-group">
@@ -48,10 +49,10 @@
       </div>
     </div>
     <div>
-  <Button type="button" @click.native="logProps"> hey </Button>
+      {{params }}
     </div>
     <div class="control-actions">
-      <Button type="submit" size="l" theme="primary" :loading="submitting">Create</Button>
+      <Button type="button" size="l" theme="primary" :loading="submitting" @click.native="handleSubmit">Create</Button>
       <Button type="button" size="l" outline @click.native="handleCancel">Cancel</Button>
       <div class="error-message" v-if="errors.length">{{ errors.join("\n") }}</div>
     </div>
@@ -95,6 +96,10 @@ export default {
         && Object.keys(this.$store.state.branches[this.slug].data)
         || [];
     },
+    shouldRenderTextInput(){
+      console.log(Object.keys(this.passed).length !== 0)
+      return Object.keys(this.passed).length !== 0
+    }
   },
   methods: {
     async handleSubmit(e) {
@@ -106,17 +111,15 @@ export default {
         branch: this.branch,
         params: this.params
       };
-
       const build = {
         namespace,
         name,
         ...inputs
       };
-
+      console.log(build)
       if (!this.branch.length) this.errors.push("Branch is required");
       if (!this.errors.length) {
         this.submitting = true;
-
         try {
           const data = await this.$store.dispatch("createBuild", build);
           this.$emit("submit", inputs);
@@ -148,6 +151,22 @@ export default {
     },
     logProps(){
     console.log(this.passed)      
+    }
+  },
+  created(){
+    const GH_BUILD_BRANCH_KEY = "gh_build_branch_name"
+    let passedKeys = Object.keys(this.passed)
+    if (passedKeys.length != 0) {
+      for (let key of passedKeys){
+        if (key === GH_BUILD_BRANCH_KEY) {
+          this.branch = this.passed[GH_BUILD_BRANCH_KEY]
+        }else {
+          this.params[key] = this.passed[key]
+        }
+      }
+      console.log("ther'es a passed params")
+    }else{
+      console.log("there's no params")
     }
   },
   mounted() {
