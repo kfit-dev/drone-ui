@@ -194,7 +194,7 @@ export default {
 }
 
 .form {
-  max-width: 464px;
+  max-width: 720px;
 
   .base-input {
     width: 100%;
@@ -255,8 +255,9 @@ export default {
   }
 
   .param-list-key {
-    text-overflow: ellipsis;
+    // text-overflow: ellipsis;
     overflow: hidden;
+    max-width: 80%;
   }
 
   .param-list-item {
