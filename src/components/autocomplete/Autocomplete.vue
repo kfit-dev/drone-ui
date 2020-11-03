@@ -27,12 +27,12 @@ export default {
     AutocompletePopup,
   },
   props: {
-    options: { 
-      type: Array, 
-      default: [] 
+    options: {
+      type: Array,
+      default: []
     },
-    filter: { 
-      type: Function, 
+    filter: {
+      type: Function,
       default: (options, input) => options.filter(option => option.includes(input))
     },
   },

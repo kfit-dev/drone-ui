@@ -1,4 +1,5 @@
 import Router from "vue-router";
+import qs from "qs";
 
 import Account from "../views/Account.vue";
 import Build from "../views/Build.vue";
@@ -18,6 +19,8 @@ import BuildsFeed from "../views/BuildsFeed.vue";
 export default new Router({
   mode: "history",
   base: "/",
+  parseQuery: qs.parse,
+  stringifyQuery: query => qs.stringify(query, { addQueryPrefix: true }),
   routes: [
     {
       path: "/login/form",
@@ -69,6 +72,11 @@ export default new Router({
             {
               path: "",
               name: "builds",
+              component: Builds
+            },
+            {
+              path: "new",
+              name: "builds-new",
               component: Builds
             },
             {

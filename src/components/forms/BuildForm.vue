@@ -10,15 +10,14 @@
         <label>Branch</label>
       </div>
       <div class="controls">
-        <BaseInput v-if="shouldRenderTextInput" v-model="branch"></BaseInput>
-        <Autocomplete v-else v-model="branch"  :options="branches"/>
+        <Autocomplete v-model="branch" :options="branches"/>
       </div>
     </div>
     <div class="control-group">
       <label class="control-label">Parameters</label>
       <div class="controls param-list-container">
         <ul class="param-list">
-          <li v-for="(val, key) in params" :key="key" class="param-list-item">
+          <li v-for="(val, key) in $route.query.params" :key="key" class="param-list-item">
             <code class="param-list-key" :title="`${key}=${val}`">{{key}}={{val}}</code>
             <Button @click.native.prevent="(e) => handleRmParam(key, e)" type="button" theme="danger" size="m" outline borderless>Remove</Button>
           </li>
@@ -48,11 +47,8 @@
         </BaseForm>
       </div>
     </div>
-    <div>
-      {{params }}
-    </div>
     <div class="control-actions">
-      <Button type="button" size="l" theme="primary" :loading="submitting" @click.native="handleSubmit">Create</Button>
+      <Button type="submit" size="l" theme="primary" :loading="submitting">Create</Button>
       <Button type="button" size="l" outline @click.native="handleCancel">Cancel</Button>
       <div class="error-message" v-if="errors.length">{{ errors.join("\n") }}</div>
     </div>
@@ -73,13 +69,10 @@ export default {
     BaseForm,
     Autocomplete
   },
-  props: ['passed'],
   data() {
     return {
       submitting: false,
       errors: [],
-      branch: "",
-      params: {},
       paramInput: {
         key: "",
         value: ""
@@ -96,9 +89,23 @@ export default {
         && Object.keys(this.$store.state.branches[this.slug].data)
         || [];
     },
-    shouldRenderTextInput(){
-      console.log(Object.keys(this.passed).length !== 0)
-      return Object.keys(this.passed).length !== 0
+    branch: {
+      get() {
+        return this.$route.query.branch
+      },
+      set(value) {
+        if (value.length > 1) {
+          this.$router.replace({
+            query: { branch: value }
+          })
+        } else {
+          const query = {...this.$route.query}
+          delete query.branch
+          this.$router.replace({
+            query
+          })
+        }
+      }
     }
   },
   methods: {
@@ -108,16 +115,18 @@ export default {
       const { namespace, name } = this.$route.params;
 
       const inputs = {
-        branch: this.branch,
-        params: this.params
+        branch: this.$route.query.branch,
+        params: this.$route.query.params
       };
+
       const build = {
         namespace,
         name,
         ...inputs
       };
-      console.log(build)
-      if (!this.branch.length) this.errors.push("Branch is required");
+
+      if (!this.$route.query.branch.length) this.errors.push("Branch is required");
+
       if (!this.errors.length) {
         this.submitting = true;
         try {
@@ -142,32 +151,36 @@ export default {
     handleAddParam(e) {
       if (this.paramInput.key == "" || this.paramInput.value == "") return;
 
-      this.params[this.paramInput.key] = this.paramInput.value;
+      const params = {
+        ...this.$route.query.params,
+        [this.paramInput.key]: this.paramInput.value
+      }
+
+      this.$router.push({
+        query: {
+          ...this.$route.query,
+          params: params
+        }
+      })
+
       this.paramInput.key = "";
       this.paramInput.value = "";
     },
     handleRmParam(key) {
-      this.$delete(this.params, key);
-    },
-    logProps(){
-    console.log(this.passed)      
-    }
-  },
-  created(){
-    const GH_BUILD_BRANCH_KEY = "gh_build_branch_name"
-    let passedKeys = Object.keys(this.passed)
-    if (passedKeys.length != 0) {
-      for (let key of passedKeys){
-        if (key === GH_BUILD_BRANCH_KEY) {
-          this.branch = this.passed[GH_BUILD_BRANCH_KEY]
-        }else {
-          this.params[key] = this.passed[key]
-        }
+      const params = {
+        ...this.$route.query.params,
       }
-      console.log("ther'es a passed params")
-    }else{
-      console.log("there's no params")
-    }
+
+      delete params[key]
+
+      this.$router.replace({
+        name: this.$route.name,
+        query: {
+          ...this.$route.query,
+          params: params
+        }
+      })
+    },
   },
   mounted() {
     this.$store.dispatch("fetchBranches", this.$store.state.route.params);
@@ -181,7 +194,7 @@ export default {
 }
 
 .form {
-  // max-width: 464px;
+  max-width: 464px;
 
   .base-input {
     width: 100%;
