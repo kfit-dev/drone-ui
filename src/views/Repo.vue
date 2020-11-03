@@ -167,10 +167,10 @@ export default {
   },
   methods: {
     openBuildModal() {
-      this.$router.push({name: 'builds-new'})
+      this.$router.replace({name: "builds-new"})
     },
     closeBuildModal() {
-      this.$router.back()
+      this.$router.replace({name: "builds"})
     },
     handleActivate() {
       const { namespace, name } = this.$route.params;
