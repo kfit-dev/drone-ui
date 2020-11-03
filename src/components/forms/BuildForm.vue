@@ -203,7 +203,7 @@ export default {
 }
 
 .form {
-  max-width: 720px;
+  max-width: 464px;
 
   .base-input {
     width: 100%;
@@ -264,32 +264,31 @@ export default {
   }
 
   .param-list-key {
-    // text-overflow: ellipsis;
+    text-overflow: ellipsis;
     overflow: hidden;
-    max-width: 80%;
+    flex-grow: 1;
   }
 
+  .param-list-form,
   .param-list-item {
     display: flex;
     align-items: baseline;
-    justify-content: space-between;
-    padding: 2px 0;
 
     code {
       font-family: monospace;
+      font-size: 16px;
     }
-  }
-
-  .param-list-form {
-    display: flex;
-    flex-wrap: nowrap;
 
     * + * {
       margin-left: 0.5rem;
     }
 
     * {
-      flex-shrink: 1;
+      min-width: 0;
+    }
+
+    .button {
+      flex-shrink: 0;
     }
   }
 }
