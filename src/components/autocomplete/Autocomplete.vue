@@ -2,7 +2,7 @@
   <BaseForm @focusin.native="show = true" @focusout.native="show = false" style="position: relative;">
     <BaseInput
       @input.native="setInput($event.target.value)"
-      :value="input"
+      :value="value"
       autocomplete="off"
       autocorrect="off"
       autocapitalize="off"
@@ -27,6 +27,10 @@ export default {
     AutocompletePopup,
   },
   props: {
+    value: {
+      type: String,
+      default: ""
+    },
     options: {
       type: Array,
       default: []
@@ -38,8 +42,7 @@ export default {
   },
   data() {
     return {
-      show: false,
-      input: ""
+      show: false
     }
   },
   computed: {
