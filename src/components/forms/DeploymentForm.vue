@@ -171,7 +171,7 @@ export default {
 }
 
 .form {
-  max-width: 520px;
+  max-width: 641px;
 
   .base-input {
     width: 100%;
